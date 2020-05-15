@@ -32,6 +32,7 @@ class SubscriptionCreateView(GenericAPIView):
             {
                 "result": True,
                 "subscriptions": {
+                    "id": subscription.id,
                     "customer": subscription.customer,
                     "start_date": subscription.start_date,
                     "end_date": subscription.end_date,
