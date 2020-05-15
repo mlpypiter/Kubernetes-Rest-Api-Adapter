@@ -26,7 +26,7 @@ class Subscription(BaseModel):
     extra_call_record_package = models.IntegerField(blank=False, default=1)
     demo = models.BooleanField(blank=False, default=False)
     extra_duration_package =models.IntegerField(blank=False, default=1)
-    servers = models.CharField(blank=False, max_length=255)
+    state = models.CharField(blank=False, max_length=255, default="Not Initialized ")
 
     def __str__(self):
         return self.pk

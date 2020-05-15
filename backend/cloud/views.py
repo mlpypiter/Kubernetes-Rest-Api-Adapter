@@ -28,6 +28,7 @@ class SubscriptionCreateView(GenericAPIView):
         subscription.extra_call_record_package = serializer.data.get('extra_call_record_package')
         subscription.demo = serializer.data.get('demo')
         subscription.extra_duration_package = serializer.data.get('extra_duration_package')
+        subscription.state = "Initializing"
         subscription.save()
 
         return Response(

@@ -85,4 +85,4 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
             attrs['serviceType'] = serviceType
             return attrs
         except ObjectDoesNotExist:
-            raise CustomException(code=10, message=self.error_messages['invalid_type'])
+            raise CustomException(code=14, message=self.error_messages['invalid_type'])
