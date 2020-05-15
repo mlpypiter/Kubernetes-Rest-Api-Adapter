@@ -2,13 +2,13 @@ from django.db import models
 from common.models import BaseModel
 
 
-class ServiceType(BaseModel):
+class ServiceType(models.Model):
     class Meta:
         db_table = 'ServiceType'
-    type = models.CharField(blank=False, max_length=255)
+    name = models.CharField(blank=False, max_length=255)
 
     def __str__(self):
-        return self.pk
+        return self.name
 
 
 class Subscription(BaseModel):

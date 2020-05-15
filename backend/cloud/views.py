@@ -1,5 +1,4 @@
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -8,8 +7,6 @@ from .models import Subscription
 
 
 class SubscriptionCreateView(GenericAPIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = ()
     serializer_class = SubscriptionCreateSerializer
 
     def post(self, request):
@@ -20,7 +17,7 @@ class SubscriptionCreateView(GenericAPIView):
         subscription.start_date = serializer.data.get('start_date')
         subscription.end_date = serializer.data.get('end_date')
         subscription.term_subscription = serializer.data.get('term_subscription')
-        subscription.service_type = serializer.validated_data['service_type']
+        subscription.service_type = serializer.validated_data['serviceType']
         subscription.subscription = serializer.data.get('subscription')
         subscription.server_name_prefix = serializer.data.get('server_name_prefix')
         subscription.package = serializer.data.get('package')
@@ -39,8 +36,8 @@ class SubscriptionCreateView(GenericAPIView):
                     "start_date": subscription.start_date,
                     "end_date": subscription.end_date,
                     "term_subscription": subscription.term_subscription,
-                    "service_type": subscription.service_type.type,
-                    "subscription": subscription.subscriptio,
+                    "service_type": subscription.service_type.name,
+                    "subscription": subscription.subscription,
                     "server_name_prefix": subscription.server_name_prefix,
                     "package": subscription.package,
                     "trunk_service_provider": subscription.trunk_service_provider,
