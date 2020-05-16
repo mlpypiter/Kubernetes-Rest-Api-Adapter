@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from .serializers import SubscriptionCreateSerializer, ServerStatusSerializer
+from .serializers import SubscriptionCreateSerializer, ServerStatusSerializer, ChangeServerSerializer
 from .models import Subscription, ServiceType, Server, IpgServer, WebcmServer
 
 
@@ -69,6 +69,30 @@ class ControlServerView(GenericAPIView):
                 "subscriptions": {
                     "id": server.id,
                     "action": server.action,
+                    "server_type": server.server_type,
+                }
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class ChangeServerView(GenericAPIView):
+    serializer_class = ChangeServerSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        server = serializer.validated_data['server']
+        server.action = serializer.data.get('status')
+        server.server_type = serializer.data.get('server_type')
+        server.save()
+
+        return Response(
+            {
+                "result": True,
+                "subscriptions": {
+                    "id": server.id,
+                    "status": server.action,
                     "server_type": server.server_type,
                 }
             },

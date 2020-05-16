@@ -121,3 +121,38 @@ class ServerStatusSerializer(serializers.ModelSerializer):
             return attrs
         except ObjectDoesNotExist:
             raise CustomException(code=14, message=self.error_messages['invalid_serverid'])
+
+
+class ChangeServerSerializer(serializers.ModelSerializer):
+    status = serializers.IntegerField(required=False)
+    server_id = serializers.CharField(required=False)
+    server_type = serializers.CharField(required=False)
+
+    default_error_messages = {
+        'invalid_status': _('status is invalid.'),
+        'invalid_server_id': _('server_id is not invalid.'),
+        'invalid_server_type': _('server_type is invalid.'),
+    }
+
+    class Meta:
+        model = Subscription
+        fields = ("status", "server_id", "server_type")
+
+    def validate(self, attrs):
+        status = attrs.get("status")
+        server_id = attrs.get("server_id")
+        server_type = attrs.get("server_type")
+
+        if not status:
+            raise CustomException(code=10, message=self.error_messages['invalid_status'])
+        if not server_id:
+            raise CustomException(code=11, message=self.error_messages['invalid_server_id'])
+        if not server_type:
+            raise CustomException(code=12, message=self.error_messages['invalid_server_type'])
+
+        try:
+            server = Server.objects.get(id=server_id)
+            attrs['server'] = server
+            return attrs
+        except ObjectDoesNotExist:
+            raise CustomException(code=14, message=self.error_messages['invalid_server_id'])
