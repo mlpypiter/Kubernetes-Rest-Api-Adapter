@@ -98,3 +98,34 @@ class ChangeServerView(GenericAPIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class GetbrokenSubscriptionsView(GenericAPIView):
+
+    def get(self, request):
+        subscriptions = Subscription.objects.all()
+        subscriptions_list = []
+        for subscription in subscriptions:
+            subscriptions_list.append({
+                    "id": subscription.id,
+                    "customer": subscription.customer,
+                    "start_date": subscription.start_date,
+                    "end_date": subscription.end_date,
+                    "term_subscription": subscription.term_subscription,
+                    "service_type": subscription.service_type.name,
+                    "subscription": subscription.subscription,
+                    "server_name_prefix": subscription.server_name_prefix,
+                    "package": subscription.package,
+                    "trunk_service_provider": subscription.trunk_service_provider,
+                    "extra_call_record_package": subscription.extra_call_record_package,
+                    "demo": subscription.demo,
+                    "extra_duration_package": subscription.extra_duration_package,
+            })
+
+        return Response(
+            {
+                "result": True,
+                "subscriptions": subscriptions_list,
+            },
+            status=status.HTTP_200_OK
+        )
