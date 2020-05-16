@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from .serializers import SubscriptionCreateSerializer
-from .models import Subscription
+from .serializers import SubscriptionCreateSerializer, ServerStatusSerializer
+from .models import Subscription, ServiceType, Server, IpgServer, WebcmServer
 
 
 class SubscriptionCreateView(GenericAPIView):
@@ -47,6 +47,30 @@ class SubscriptionCreateView(GenericAPIView):
                     "extra_duration_package": subscription.extra_duration_package,
                 }
 
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class ControlServerView(GenericAPIView):
+    serializer_class = ServerStatusSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        server = serializer.validated_data['server']
+        server.action = serializer.data.get('action')
+        server.server_type = serializer.data.get('server_type')
+        server.save()
+
+        return Response(
+            {
+                "result": True,
+                "subscriptions": {
+                    "id": server.id,
+                    "action": server.action,
+                    "server_type": server.server_type,
+                }
             },
             status=status.HTTP_200_OK
         )
