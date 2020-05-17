@@ -18,15 +18,16 @@ class Subscription(BaseModel):
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
     term_subscription = models.BooleanField(blank=False, default=False)
-    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
+    # service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
+    service_type = models.CharField(blank=False, max_length=255)
     subscription = models.CharField(blank=False, max_length=255)
     server_name_prefix = models.CharField(blank=False, max_length=255)
     package = models.IntegerField(blank=False, default=1)
-    trunk_service_provider = models.IntegerField(blank=False, default=1)
-    extra_call_record_package = models.IntegerField(blank=False, default=1)
-    demo = models.BooleanField(blank=False, default=False)
-    extra_duration_package =models.IntegerField(blank=False, default=1)
-    state = models.CharField(blank=False, max_length=255, default="Not Initialized ")
+    trunk_service_provider = models.IntegerField(blank=True, default=1)
+    extra_call_record_package = models.IntegerField(null=True, default=1)
+    demo = models.BooleanField(null=True, default=False)
+    extra_duration_package =models.IntegerField(null=True, default=1)
+    state = models.CharField(null=True, max_length=255, default="Not Initialized ")
 
     def __str__(self):
         return self.pk
@@ -69,8 +70,10 @@ class WebcmServer(models.Model):
 class Server(models.Model):
     class Meta:
         db_table = 'Server'
-    action = models.CharField(blank=False, max_length=255)
-    server_type = models.CharField(blank=False, max_length=255)
+    action = models.CharField(blank=False, max_length=255, default="Stop")
+    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
+    status = models.CharField(blank=False, max_length=255, default="Active")
 
     def __str__(self):
         return self.pk

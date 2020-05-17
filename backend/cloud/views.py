@@ -3,7 +3,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from .serializers import SubscriptionCreateSerializer, ServerStatusSerializer, ChangeServerSerializer
-from .models import Subscription, ServiceType, Server, IpgServer, WebcmServer
+from .models import Subscription, Server, ServiceType
+from common.serializers import serialize_subscription
 
 
 class SubscriptionCreateView(GenericAPIView):
@@ -12,40 +13,43 @@ class SubscriptionCreateView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        subscription = Subscription()
-        subscription.customer = serializer.data.get('customer')
-        subscription.start_date = serializer.data.get('start_date')
-        subscription.end_date = serializer.data.get('end_date')
-        subscription.term_subscription = serializer.data.get('term_subscription')
-        subscription.service_type = serializer.validated_data['serviceType']
-        subscription.subscription = serializer.data.get('subscription')
-        subscription.server_name_prefix = serializer.data.get('server_name_prefix')
-        subscription.package = serializer.data.get('package')
-        subscription.trunk_service_provider = serializer.data.get('trunk_service_provider')
-        subscription.extra_call_record_package = serializer.data.get('extra_call_record_package')
-        subscription.demo = serializer.data.get('demo')
-        subscription.extra_duration_package = serializer.data.get('extra_duration_package')
-        subscription.state = "Initializing"
-        subscription.save()
+
+        subscriptions = serializer.data.get('subscriptions')
+        subscription_list = []
+        if subscriptions:
+            for subscription in subscriptions:
+                subscription_a = Subscription(
+                    customer=subscription['customer'],
+                    start_date=subscription['start_date'],
+                    end_date=subscription['end_date'],
+                    term_subscription=subscription['term_subscription'],
+                    service_type=subscription['service_type'],
+                    subscription=subscription['subscription'],
+                    server_name_prefix=subscription['server_name_prefix'],
+                    package=subscription['package'],
+                    trunk_service_provider=subscription['trunk_service_provider'],
+                    extra_call_record_package=subscription['extra_call_record_package'],
+                    demo=subscription['demo'],
+                    extra_duration_package=subscription['extra_duration_package'],
+                    state="Initializing"
+                )
+                subscription_a.save()
+                servers = subscription['servers']
+                Servers = []
+                if servers:
+                    for server in servers:
+                        server = Server(service_type=ServiceType.objects.get(name=server), action='Stop', subscription=subscription_a)
+                        server.save()
+                        Servers.append(server.service_type.name)
+                subscription_list.append({
+                    **serialize_subscription(subscription_a),
+                    "servers": Servers
+                })
 
         return Response(
             {
                 "result": True,
-                "subscriptions": {
-                    "id": subscription.id,
-                    "customer": subscription.customer,
-                    "start_date": subscription.start_date,
-                    "end_date": subscription.end_date,
-                    "term_subscription": subscription.term_subscription,
-                    "service_type": subscription.service_type.name,
-                    "subscription": subscription.subscription,
-                    "server_name_prefix": subscription.server_name_prefix,
-                    "package": subscription.package,
-                    "trunk_service_provider": subscription.trunk_service_provider,
-                    "extra_call_record_package": subscription.extra_call_record_package,
-                    "demo": subscription.demo,
-                    "extra_duration_package": subscription.extra_duration_package,
-                }
+                "subscriptions": subscription_list
 
             },
             status=status.HTTP_200_OK
@@ -60,7 +64,7 @@ class ControlServerView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         server = serializer.validated_data['server']
         server.action = serializer.data.get('action')
-        server.server_type = serializer.data.get('server_type')
+        server.server_type = serializer.validated_data['server_type']
         server.save()
 
         return Response(
@@ -69,7 +73,7 @@ class ControlServerView(GenericAPIView):
                 "subscriptions": {
                     "id": server.id,
                     "action": server.action,
-                    "server_type": server.server_type,
+                    "server_type": server.server_type.name,
                 }
             },
             status=status.HTTP_200_OK
@@ -83,17 +87,17 @@ class ChangeServerView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         server = serializer.validated_data['server']
-        server.action = serializer.data.get('status')
-        server.server_type = serializer.data.get('server_type')
+        server.status = serializer.data.get('status')
+        server.service_type = serializer.validated_data['server_type']
         server.save()
 
         return Response(
             {
                 "result": True,
                 "subscriptions": {
-                    "id": server.id,
-                    "status": server.action,
-                    "server_type": server.server_type,
+                    "status": server.status,
+                    "server_id": server.id,
+                    "server_type": server.service_type.name,
                 }
             },
             status=status.HTTP_200_OK
