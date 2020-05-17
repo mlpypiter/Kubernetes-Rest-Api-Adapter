@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 
 from common.exception import CustomException
-from .models import Subscription, ServiceType, Server
+from .models import Subscription, ServerType, Server
 
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
@@ -12,72 +12,9 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
     default_error_messages = {
         'invalid_subscriptions': _('subscriptions is invalid.'),
     }
-    # customer = serializers.CharField(required=False)
-    # start_date = serializers.CharField(required=False)
-    # end_date = serializers.CharField(required=False)
-    # term_subscription = serializers.BooleanField(required=False)
-    # service_type = serializers.IntegerField(required=False)
-    # subscription = serializers.CharField(required=False)
-    # server_name_prefix = serializers.CharField(required=False)
-    # package = serializers.IntegerField(required=False)
-    # trunk_service_provider = serializers.IntegerField(required=False)
-    # extra_call_record_package = serializers.IntegerField(required=False)
-    # demo = serializers.BooleanField(required=False)
-    # extra_duration_package = serializers.IntegerField(required=False)
-
-    # default_error_messages = {
-    #     'invalid_customer': _('customer is invalid.'),
-    #     'invalid_start_date': _('start_date is not selected.'),
-    #     'invalid_end_date': _('end_date is invalid.'),
-    #     'invalid_term': _('term is selected.'),
-    #     'invalid_type': _('type is invalid.'),
-    #     'invalid_subscription': _('subscription was not selected.'),
-    #     'invalid_name': _('name was not selected.'),
-    #     'invalid_package': _('package was not selected.'),
-    # }
-
-    # class Meta:
-    #     model = Subscription
-    #     fields = ("customer", "start_date", "end_date", "term_subscription", "service_type", "subscription",
-    #               "server_name_prefix", "package", "trunk_service_provider", "extra_call_record_package", "demo",
-    #               "extra_duration_package")
     class Meta:
         model = Subscription
         fields = ("subscriptions",)
-
-    # def validate(self, attrs):
-    #     customer = attrs.get("customer")
-    #     start_date = attrs.get("start_date")
-    #     end_date = attrs.get("end_date")
-    #     term_subscription = attrs.get("term_subscription")
-    #     service_type = attrs.get("service_type")
-    #     subscription = attrs.get("subscription")
-    #     server_name_prefix = attrs.get("server_name_prefix")
-    #     package = attrs.get("package")
-    #
-    #     if not customer:
-    #         raise CustomException(code=10, message=self.error_messages['invalid_customer'])
-    #     if not start_date:
-    #         raise CustomException(code=11, message=self.error_messages['invalid_start_date'])
-    #     if not end_date:
-    #         raise CustomException(code=12, message=self.error_messages['invalid_end_date'])
-    #     if not term_subscription:
-    #         raise CustomException(code=13, message=self.error_messages['invalid_term'])
-    #     if not service_type:
-    #         raise CustomException(code=14, message=self.error_messages['invalid_type'])
-    #     if not subscription:
-    #         raise CustomException(code=15, message=self.error_messages['invalid_subscription'])
-    #     if not server_name_prefix:
-    #         raise CustomException(code=16, message=self.error_messages['invalid_name'])
-    #     if not package:
-    #         raise CustomException(code=17, message=self.error_messages['invalid_package'])
-    #
-    #     try:
-    #         serviceType = ServiceType.objects.get(id=service_type)
-    #         attrs['serviceType'] = serviceType
-    #         return attrs
-    #     except ObjectDoesNotExist:
-    #         raise CustomException(code=14, message=self.error_messages['invalid_type'])
 
     def validate(self, attrs):
         return attrs
@@ -112,7 +49,7 @@ class ServerStatusSerializer(serializers.ModelSerializer):
 
         try:
             server = Server.objects.get(id=server_ids)
-            server_type = ServiceType.objects.get(name=server_type)
+            server_type = ServerType.objects.get(name=server_type)
             attrs['server'] = server
             attrs['server_type'] = server_type
             return attrs
@@ -149,9 +86,55 @@ class ChangeServerSerializer(serializers.ModelSerializer):
 
         try:
             server = Server.objects.get(id=server_id)
-            server_type = ServiceType.objects.get(name=server_type)
+            server_type = ServerType.objects.get(name=server_type)
             attrs['server'] = server
             attrs['server_type'] = server_type
             return attrs
         except ObjectDoesNotExist:
             raise CustomException(code=14, message=self.error_messages['invalid_server_id'])
+
+
+class UpdateServiceSerializer(serializers.ModelSerializer):
+    subscription = serializers.IntegerField(required=False)
+    service = serializers.CharField(required=False)
+    servers = serializers.DictField(required=False)
+
+    default_error_messages = {
+        'invalid_subscription': _('subscription is invalid.'),
+        'invalid_service': _('service is invalid.'),
+    }
+
+    class Meta:
+        model = Subscription
+        fields = ("subscription", "service", "servers")
+
+    def validate(self, attrs):
+        subscription = attrs.get("subscription")
+        service = attrs.get("service")
+        servers = attrs.get("servers")
+        print(servers)
+
+        if not subscription:
+            raise CustomException(code=10, message=self.error_messages['invalid_subscription'])
+        if not service:
+            raise CustomException(code=11, message=self.error_messages['invalid_service'])
+
+        subscription = Subscription.objects.get(subscription=subscription)
+        attrs['subscription'] = subscription
+        return attrs
+
+
+class GetbrokenSubscriptionsSerializer(serializers.ModelSerializer):
+    subscriptions = serializers.ListField(required=False)
+
+    default_error_messages = {
+        'invalid_subscriptions': _('subscriptions is invalid.'),
+    }
+
+    class Meta:
+        model = Subscription
+        fields = ("subscriptions",)
+
+    def validate(self, attrs):
+        return attrs
+

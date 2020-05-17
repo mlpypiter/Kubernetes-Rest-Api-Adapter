@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import SubscriptionCreateView, ControlServerView, ChangeServerView, GetbrokenSubscriptionsView, UpdateServiceDetail
+from .views import SubscriptionCreateView, ControlServerView, ChangeServerView, GetbrokenSubscriptionsView, \
+    UpdateServiceDetail
 app_name = 'cloud'
 
 urlpatterns = [

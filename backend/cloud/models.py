@@ -2,9 +2,9 @@ from django.db import models
 from common.models import BaseModel
 
 
-class ServiceType(models.Model):
+class ServerType(models.Model):
     class Meta:
-        db_table = 'ServiceType'
+        db_table = 'ServerType'
     name = models.CharField(blank=False, max_length=255)
 
     def __str__(self):
@@ -19,7 +19,7 @@ class Subscription(BaseModel):
     end_date = models.DateTimeField(null=True)
     term_subscription = models.BooleanField(blank=False, default=False)
     # service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
-    service_type = models.CharField(blank=False, max_length=255)
+    service_type = models.CharField(blank=False, max_length=255, default="Ipg")
     subscription = models.CharField(blank=False, max_length=255)
     server_name_prefix = models.CharField(blank=False, max_length=255)
     package = models.IntegerField(blank=False, default=1)
@@ -33,20 +33,32 @@ class Subscription(BaseModel):
         return self.pk
 
 
+class Server(models.Model):
+    class Meta:
+        db_table = 'Server'
+    action = models.CharField(blank=False, max_length=255, default="Stop")
+    server_type = models.ForeignKey(ServerType, on_delete=models.CASCADE)
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
+    status = models.CharField(blank=False, max_length=255, default="Active")
+
+    def __str__(self):
+        return self.pk
+
+
 class IpgServer(models.Model):
     class Meta:
         db_table = 'IpgServer'
-    cpu = models.CharField(blank=False, max_length=255)
-    ram = models.CharField(blank=False, max_length=255)
-    disc = models.CharField(blank=False, max_length=255)
-    widea_address = models.CharField(blank=False, max_length=255)
-    local_ip = models.CharField(blank=False, max_length=255)
-    external_ip = models.CharField(blank=False, max_length=255)
-    external_ip = models.CharField(blank=False, max_length=255)
-    server_name = models.CharField(blank=False, max_length=255)
-    server_id = models.CharField(blank=False, max_length=255)
-    state = models.IntegerField(blank=False, default=1)
-    fqdn = models.CharField(blank=False, max_length=255)
+    cpu = models.CharField(null=True, max_length=255)
+    ram = models.CharField(null=True, max_length=255)
+    disc = models.CharField(null=True, max_length=255)
+    widea_address = models.CharField(null=True, max_length=255)
+    local_ip = models.CharField(null=True, max_length=255)
+    internal_ip = models.CharField(null=True, max_length=255)
+    external_ip = models.CharField(null=True, max_length=255)
+    server_name = models.CharField(null=True, max_length=255)
+    server = models.ForeignKey(Server, on_delete=models.CASCADE)
+    state = models.IntegerField(null=True, default=1)
+    fqdn = models.CharField(null=True, max_length=255)
 
     def __str__(self):
         return self.pk
@@ -55,25 +67,13 @@ class IpgServer(models.Model):
 class WebcmServer(models.Model):
     class Meta:
         db_table = 'WebcmServer'
-    address = models.CharField(blank=False, max_length=255)
-    local_ip = models.CharField(blank=False, max_length=255)
-    internal_ip = models.CharField(blank=False, max_length=255)
-    server_name = models.CharField(blank=False, max_length=255)
-    server_id = models.CharField(blank=False, max_length=255)
-    state = models.IntegerField(blank=False, default=1)
-    fqdn = models.CharField(blank=False, max_length=255)
-
-    def __str__(self):
-        return self.pk
-
-
-class Server(models.Model):
-    class Meta:
-        db_table = 'Server'
-    action = models.CharField(blank=False, max_length=255, default="Stop")
-    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
-    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
-    status = models.CharField(blank=False, max_length=255, default="Active")
+    address = models.CharField(null=True, max_length=255)
+    local_ip = models.CharField(null=True, max_length=255)
+    internal_ip = models.CharField(null=True, max_length=255)
+    server_name = models.CharField(null=True, max_length=255)
+    server = models.ForeignKey(Server, on_delete=models.CASCADE)
+    state = models.IntegerField(null=True, default=1)
+    fqdn = models.CharField(null=True, max_length=255)
 
     def __str__(self):
         return self.pk
