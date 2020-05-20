@@ -119,8 +119,12 @@ class UpdateServiceSerializer(serializers.ModelSerializer):
         if not service:
             raise CustomException(code=11, message=self.error_messages['invalid_service'])
 
-        subscription = Subscription.objects.get(subscription=subscription)
-        attrs['subscription'] = subscription
+        try:
+            subscription = Subscription.objects.get(subscription=subscription)
+            attrs['subscription'] = subscription
+        except ObjectDoesNotExist:
+            raise CustomException(code=14, message=self.error_messages['invalid_subscription'])
+
         return attrs
 
 
