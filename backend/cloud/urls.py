@@ -7,7 +7,7 @@ urlpatterns = [
     path('byp/setapprovedsubscriptions/', SubscriptionCreateView.as_view()),
     path('byp/control_server/', ControlServerView.as_view()),
 
-    path('byp.karel.cloud/updateservicedetail/', UpdateServiceDetail.as_view()),
-    path('byp.karel.cloud/updateserverstate/', ChangeServerView.as_view()),
-    path('byp.karel.cloud/getbrokensubscriptions/', GetbrokenSubscriptionsView.as_view()),
+    path('byp.karel.cloud/byp/updateservicedetail/', UpdateServiceDetail.as_view()),
+    path('byp.karel.cloud/byp/updateserverstate/', ChangeServerView.as_view()),
+    path('byp.karel.cloud/byp/getbrokensubscriptions/', GetbrokenSubscriptionsView.as_view()),
 ]
